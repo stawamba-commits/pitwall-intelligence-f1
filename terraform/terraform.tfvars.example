@@ -1,0 +1,6 @@
+# Copy this file to terraform.tfvars and fill it in. terraform.tfvars is NOT committed.
+# Account identifier ABCDEFG-XY12345  ->  organization_name = "ABCDEFG", account_name = "XY12345"
+organization_name = "ABCDEFG"
+account_name      = "XY12345"
+user              = "YOUR_USER"
+private_key_path  = "../../keys/rsa_key.p8"

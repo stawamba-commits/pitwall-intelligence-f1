@@ -1,0 +1,19 @@
+# PitWall Analytics · bronze -> silver -> gold (same layout as the course's ByteBrew dbt project)
+name: pitwall_dbt
+version: "1.0.0"
+config-version: 2
+profile: pitwall
+require-dbt-version: [">=1.11.0", "<1.12.0"]
+
+vars:
+  # run_date: passed by Airflow (--vars '{run_date: 2026-11-09}'), see macros/cleaning.sql run_date()
+  first_season: 2014        # history used by the model (hybrid era); older seasons stay in silver
+
+models:
+  pitwall_dbt:
+    silver:
+      +schema: SILVER
+      +materialized: table
+    gold:
+      +schema: GOLD
+      +materialized: table

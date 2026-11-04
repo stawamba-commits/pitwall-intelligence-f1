@@ -1,0 +1,20 @@
+# Secrets: never in Git
+.env
+*.p8
+*.pem
+.streamlit/secrets.toml
+# Terraform state and variables
+.terraform/
+*.tfstate
+*.tfstate.*
+terraform.tfvars
+# Data and build outputs
+/data/
+ingest/data/
+target/
+logs/
+dbt_packages/
+__pycache__/
+.pytest_cache/
+venv/
+.venv/

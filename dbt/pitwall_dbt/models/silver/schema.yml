@@ -1,0 +1,46 @@
+version: 2
+models:
+  - name: stg_races
+    description: "Calendar. Grain: one row per race_id (season-round)."
+    columns:
+      - name: race_id
+        data_tests: [unique, not_null]
+      - name: race_date
+        data_tests: [not_null]
+
+  - name: silver_results
+    description: "Clean race results. Grain: one row per race_id x driver_ref."
+    data_tests:
+      - unique_combination:                       # KEY check
+          arguments:
+            columns: [race_id, driver_ref]
+    columns:
+      - name: race_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_races')
+                field: race_id
+      - name: driver_ref
+        data_tests: [not_null]
+
+  - name: stg_qualifying
+    data_tests:
+      - unique_combination:
+          arguments:
+            columns: [race_id, driver_ref]
+
+  - name: stg_pit_stops
+    data_tests:
+      - unique_combination:
+          arguments:
+            columns: [race_id, driver_ref, stop]
+
+  - name: stg_tyre_stints
+    columns:
+      - name: compound
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["SOFT", "MEDIUM", "HARD", "INTERMEDIATE", "WET"]

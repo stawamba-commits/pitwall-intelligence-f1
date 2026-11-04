@@ -1,0 +1,21 @@
+# PitWall Analytics · Airflow on your laptop (course setup: one container, "standalone" mode).
+# Start:  docker compose up        UI: http://localhost:8080
+# Stop:   Ctrl+C then  docker compose down
+services:
+  airflow:
+    build: .
+    image: pitwall-airflow:1.0.0
+    command: standalone
+    ports:
+      - "8080:8080"
+    env_file: .env                                  # account, user, keys folder, Slack webhook (not committed)
+    environment:
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__CORE__DEFAULT_TIMEZONE: "Europe/Paris"
+      AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_ALL_ADMINS: "true"
+    volumes:
+      - ./dags:/opt/airflow/dags
+      # Lets Airflow start the pitwall-jobs and pitwall-dbt containers on your Docker.
+      - /var/run/docker.sock:/var/run/docker.sock
+    # Teaching shortcut (same as the course): root is needed to use the Docker socket on a laptop.
+    user: "0:0"

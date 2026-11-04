@@ -1,0 +1,6 @@
+pitwall_dbt/target/
+pitwall_dbt/logs/
+pitwall_dbt/dbt_packages/
+*.p8
+*.pem
+.env

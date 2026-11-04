@@ -1,0 +1,23 @@
+# PROTECTED STATE. The state file maps the code to the real objects and can hold sensitive values:
+# never commit it (.gitignore). For the team, keep it REMOTE, versioned and locked.
+# Rename to backend.tf and run `terraform init -migrate-state`.
+# The bucket itself is created once by hand (a listed manual step).
+
+# HCP Terraform (free tier) - simplest for a two-person team:
+# terraform {
+#   cloud {
+#     organization = "pitwall-analytics"
+#     workspaces { name = "pitwall-snowflake" }
+#   }
+# }
+
+# Or an S3 bucket with native locking:
+# terraform {
+#   backend "s3" {
+#     bucket       = "pitwall-terraform-state"
+#     key          = "snowflake/terraform.tfstate"
+#     region       = "eu-west-3"
+#     encrypt      = true
+#     use_lockfile = true
+#   }
+# }

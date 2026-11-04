@@ -1,0 +1,15 @@
+# Runs the unit tests (job logic + model backtest on real 2024-2025 data) on every push and pull request.
+# No secret needed: nothing here touches Snowflake or the APIs.
+name: ci
+on: [push, pull_request]
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pandas==2.2.3 scikit-learn==1.5.2 pytest==8.3.3 requests==2.32.3
+      - run: python -m py_compile ingest/*.py airflow/dags/*.py streamlit/*.py
+      - run: pytest tests -v

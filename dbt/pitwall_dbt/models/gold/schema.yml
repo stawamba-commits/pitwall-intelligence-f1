@@ -1,0 +1,77 @@
+version: 2
+models:
+  # ---------- star schema ----------
+  - name: fact_race_result
+    description: "Fact table. Grain: one row per race_id x driver_ref."
+    data_tests:
+      - unique_combination:
+          arguments:
+            columns: [race_id, driver_ref]
+    columns:
+      - name: race_id
+        data_tests:
+          - relationships:
+              arguments: {to: ref('dim_race'), field: race_id}
+      - name: driver_ref
+        data_tests:
+          - relationships:
+              arguments: {to: ref('dim_driver'), field: driver_ref}
+      - name: constructor_ref
+        data_tests:
+          - relationships:
+              arguments: {to: ref('dim_constructor'), field: constructor_ref}
+      - name: finish_order
+        data_tests: [not_null]
+
+  - name: dim_race
+    columns:
+      - name: race_id
+        data_tests: [unique, not_null]
+  - name: dim_driver
+    columns:
+      - name: driver_ref
+        data_tests: [unique, not_null]
+  - name: dim_constructor
+    columns:
+      - name: constructor_ref
+        data_tests: [unique, not_null]
+  - name: dim_circuit
+    columns:
+      - name: circuit_ref
+        data_tests: [unique, not_null]
+      - name: geojson_key           # circuits of the calendar not found in the f1-circuits file
+        data_tests:
+          - not_null:
+              config: {severity: warn}
+  - name: dim_weather
+    columns:
+      - name: race_id
+        data_tests: [unique]
+
+  # ---------- the 5 use cases ----------
+  - name: uc1_podium_features
+    description: "UC1 inputs. Grain: race_id x driver_ref. is_podium is null for the next race."
+    data_tests:
+      - unique_combination:
+          arguments:
+            columns: [race_id, driver_ref]
+  - name: uc2_places_gained
+    data_tests:
+      - unique_combination:
+          arguments:
+            columns: [race_id, driver_ref]
+  - name: uc3_pit_strategy
+    columns:
+      - name: circuit_ref
+        data_tests: [unique]
+  - name: uc4_rain_alert
+    columns:
+      - name: alert_level
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["LOW", "MEDIUM", "HIGH"]
+  - name: uc5_safety_car_risk
+    columns:
+      - name: circuit_ref
+        data_tests: [unique]

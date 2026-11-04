@@ -1,0 +1,9 @@
+# Never send these to the image
+.env
+*.p8
+*.pem
+data/
+__pycache__/
+.git/
+venv/
+.venv/

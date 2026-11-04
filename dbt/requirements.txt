@@ -1,0 +1,3 @@
+# Same versions as the course's dbt-runner image
+dbt-core==1.11.16
+dbt-snowflake==1.11.6

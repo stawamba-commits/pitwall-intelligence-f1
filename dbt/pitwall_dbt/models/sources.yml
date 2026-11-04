@@ -1,0 +1,42 @@
+version: 2
+sources:
+  - name: bronze
+    database: PITWALL
+    schema: BRONZE
+    config:
+      loaded_at_field: _loaded_at
+      # FRESHNESS: the daily run reloads the calendar, so bronze older than 2 days = the pipeline is not running
+      freshness:
+        warn_after: {count: 30, period: hour}
+        error_after: {count: 3, period: day}
+    tables:
+      - name: jolpica_raw          # A · API, incremental
+      - name: kaggle_races         # B · batch CSV (one-off: no freshness check)
+        config: {freshness: null}
+      - name: kaggle_results
+        config: {freshness: null}
+      - name: kaggle_qualifying
+        config: {freshness: null}
+      - name: kaggle_pit_stops
+        config: {freshness: null}
+      - name: kaggle_drivers
+        config: {freshness: null}
+      - name: kaggle_constructors
+        config: {freshness: null}
+      - name: kaggle_circuits
+        config: {freshness: null}
+      - name: kaggle_status
+        config: {freshness: null}
+      - name: weather_raw          # C · API
+      - name: fastf1_laps_summary  # D · Python library
+        config: {freshness: null}  # only refreshed on race weekends
+      - name: fastf1_stints
+        config: {freshness: null}
+      - name: fastf1_track_status
+        config: {freshness: null}
+      - name: fastf1_weather
+        config: {freshness: null}
+      - name: fastf1_results
+        config: {freshness: null}
+      - name: circuits_raw         # E · static GeoJSON file
+        config: {freshness: null}

@@ -1,0 +1,9 @@
+# Pinned versions: the same image can be rebuilt next month and behave the same way.
+# Connector and cryptography versions are the course's. Check the others with `pip index versions <pkg>`
+# when you first build, then keep them fixed.
+snowflake-connector-python[pandas]==4.8.0
+cryptography==46.0.5
+requests==2.32.3
+pandas==2.2.3
+scikit-learn==1.5.2
+fastf1==3.9.0
