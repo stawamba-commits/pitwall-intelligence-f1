@@ -18,12 +18,12 @@ SELECT (SELECT COUNT(*) FROM BRONZE.JOLPICA_RAW)                                
 -- =====================================================================================
 -- DRILL C · A broken source appends a second winner for a finished race (no MERGE)
 INSERT INTO BRONZE.JOLPICA_RAW (ENDPOINT, SEASON, ROUND, PAYLOAD, _SOURCE, _LOADED_AT, _RUN_ID)
-SELECT 'results', '2026', '20', PARSE_JSON('{"MRData":{"RaceTable":{"Races":[{"season":"2026","round":"20",
+SELECT 'results', '2026', '15', PARSE_JSON('{"MRData":{"RaceTable":{"Races":[{"season":"2026","round":"15",
   "Results":[{"position":"1","positionText":"1","points":"25","grid":"5","laps":"71","status":"Finished",
   "Driver":{"driverId":"ghost_driver","code":"GHO","givenName":"Ghost","familyName":"Driver"},
   "Constructor":{"constructorId":"ghost_team","name":"Ghost Team"}}]}]}}}'),
   'incident-drill', CURRENT_TIMESTAMP(), 'drill-c';
--- Now run `dbt build`: assert_one_winner_per_race FAILS on race 2026-20 and every model downstream
+-- Now run `dbt build`: assert_one_winner_per_race FAILS on race 2026-15 and every model downstream
 -- of fact_race_result is SKIPPED -> the dashboard keeps yesterday's correct numbers.
 
 -- Recovery: remove the bad rows, rebuild, the test passes again.
