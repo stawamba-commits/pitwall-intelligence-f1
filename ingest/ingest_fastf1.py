@@ -75,6 +75,7 @@ def results(res, season, rnd, session):
 
 def collect(season, rnd, sessions):
     import fastf1
+    from fastf1.exceptions import DataNotLoadedError
     frames = {k: [] for k in ["laps", "stints", "status", "weather", "results"]}
     for name in sessions:
         try:
@@ -83,14 +84,21 @@ def collect(season, rnd, sessions):
         except ValueError as e:          # e.g. no FP2/FP3 on a sprint weekend
             print(f"  {season} R{rnd} {name}: not available ({e})")
             continue
-        frames["laps"].append(laps_summary(s.laps, season, rnd, name))
-        frames["weather"].append(timed_rows(s.weather_data, season, rnd, name))
+        # load() only logs a warning when a part is missing (API down, rate limit, session not published yet):
+        # each part is then skipped instead of crashing the whole job; the next run fills the gap (MERGE).
+        parts = [("laps", lambda: laps_summary(s.laps, season, rnd, name)),
+                 ("weather", lambda: timed_rows(s.weather_data, season, rnd, name))]
         if name in ("Q", "R"):
-            frames["results"].append(results(s.results, season, rnd, name))
+            parts.append(("results", lambda: results(s.results, season, rnd, name)))
         if name == "R":
-            frames["stints"].append(stints(s.laps, season, rnd))
-            frames["status"].append(timed_rows(s.track_status, season, rnd, name))
-        print(f"  {season} R{rnd} {name}: {len(s.laps)} laps")
+            parts += [("stints", lambda: stints(s.laps, season, rnd)),
+                      ("status", lambda: timed_rows(s.track_status, season, rnd, name))]
+        for key, build in parts:
+            try:
+                frames[key].append(build())
+            except (DataNotLoadedError, KeyError) as e:
+                print(f"  {season} R{rnd} {name}: {key} not available, skipped ({type(e).__name__})")
+        print(f"  {season} R{rnd} {name}: done")
     return {k: pd.concat(v) if v else pd.DataFrame() for k, v in frames.items()}
 
 
@@ -127,8 +135,15 @@ def main():
                 todo.append((season, rnd, done))               # finished weekend, or practice of the next one
         print(f"  weekends to load: {[(s, r, d) for s, r, d in todo]}")
 
-        for season, rnd, sessions in todo:
-            f = collect(season, rnd, sessions)
+        from fastf1.exceptions import RateLimitExceededError
+        for i, (season, rnd, sessions) in enumerate(todo):
+            try:
+                f = collect(season, rnd, sessions)
+            except RateLimitExceededError as e:
+                # FastF1 allows 500 calls/hour. Stop cleanly: what is loaded stays (MERGE), the cache keeps the
+                # calls already made, and the next run starts again from the first weekend not yet in bronze.
+                print(f"  FastF1 rate limit reached ({e}): {len(todo) - i} weekends left for the next run")
+                break
             merge_dataframe(con, f["laps"], "BRONZE.FASTF1_LAPS_SUMMARY",
                             ["season", "round", "session", "driver_code"], "fastf1")
             merge_dataframe(con, f["stints"], "BRONZE.FASTF1_STINTS",

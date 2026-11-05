@@ -38,7 +38,14 @@ def get_json(url, params=None, retries=4, pause=2.0):
     if os.environ.get("PITWALL_SIMULATE_OUTAGE") == "1":          # incident drill A (docs/incidents.md)
         raise ConnectionError(f"Simulated outage: {url} is unreachable")
     for attempt in range(1, retries + 1):
-        r = requests.get(url, params=params, timeout=30)
+        try:
+            r = requests.get(url, params=params, timeout=60)
+        except (requests.Timeout, requests.ConnectionError) as e:   # slow or dropped answer: retry too
+            if attempt == retries:
+                raise
+            print(f"  {url} {type(e).__name__}, retry {attempt}/{retries} in {pause * attempt:.0f}s")
+            time.sleep(pause * attempt)
+            continue
         if r.status_code == 429 or r.status_code >= 500:
             print(f"  {url} answered {r.status_code}, retry {attempt}/{retries} in {pause * attempt:.0f}s")
             time.sleep(pause * attempt)

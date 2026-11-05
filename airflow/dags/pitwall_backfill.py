@@ -28,7 +28,7 @@ with DAG(
     load_circuits = job("load_circuits", "python load_circuits.py")
     load_kaggle = job("load_kaggle", "python load_kaggle.py --path /data/kaggle", mounts=KAGGLE_MOUNT)
     jolpica_2025 = job("jolpica_2025", "python ingest_jolpica.py --season 2025 --run-date 2026-01-01")
-    fastf1_history = job("fastf1_history", "python ingest_fastf1.py --backfill-from 2023 --run-date {{ ds }}",
+    fastf1_history = job("fastf1_history", "python ingest_fastf1.py --backfill-from 2025 --run-date {{ ds }}",
                          mounts=CACHE_MOUNT)
     weather_history = job("weather_history", "python ingest_weather.py --from-season 2018 --run-date {{ ds }}")
 
